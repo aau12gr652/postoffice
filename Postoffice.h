@@ -1,9 +1,8 @@
-//
 //  Postoffice.h
-//  broadcastServer
+//  Network module for rx/tx via UDP
 //
-//  Created by Benjamin Krebs on 18/04/12.
-//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
+//  Created by Benjamin Krebs on 16/04/12.
+
 //
 
 namespace Postoffice {
