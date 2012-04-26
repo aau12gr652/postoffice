@@ -1,15 +1,40 @@
-//  Postoffice.h
-//  Network module for rx/tx via UDP
 //
-//  Created by Benjamin Krebs on 16/04/12.
-
+//  postoffice.h
+//  
+//
+//  Created by Benjamin Krebs on 25/04/12.
+//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-namespace Postoffice {
-    int createTxSocket(bool broadcast, const char* ip, const char* port, int default_buffer_size);
-    int createRxSocket(bool broadcast, const char* port, int default_buffer_size);
+#ifndef _postoffice_h
+#define _postoffice_h
+
+class postoffice {
+    int socketidtx;
+    int socketidrx;
+    struct addrinfo *server_info_rx;
+    struct addrinfo *server_info_tx;
+    
+    bool decision;
+    
+    int createTxSocket(bool broadcast, const char* ip, const char* port);
+    
+    int createRxSocket(bool broadcast, const char* port);
+    
+    void createSocket(bool broadcast, const char* ip, const char* port, bool rx_true_tx_false);
+    
+public:
+    
+    postoffice(const char* port, const char* ip);
+    
     int closeConnection();
+    
     int send(const void *message, int size_of_message);
-    const char* recieve();
-}
+    
+    int recieve(void* bufferptr, int size);
+    
+};
 
+
+
+#endif
