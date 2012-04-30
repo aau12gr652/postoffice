@@ -1,40 +1,42 @@
-//
-//  postoffice.h
-//  
-//
-//  Created by Benjamin Krebs on 25/04/12.
-//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
-//
-
 #ifndef _postoffice_h
 #define _postoffice_h
 
 class postoffice {
-    int socketidtx;
-    int socketidrx;
-    struct addrinfo *server_info_rx;
-    struct addrinfo *server_info_tx;
+    int socketid;
+    bool direction;
+    struct addrinfo *server_info;
     
     bool decision;
     
     int createTxSocket(bool broadcast, const char* ip, const char* port);
-    
     int createRxSocket(bool broadcast, const char* port);
-    
-    void createSocket(bool broadcast, const char* ip, const char* port, bool rx_true_tx_false);
+    int createSocket(const char* ip, const char* port);
+    int createSocketCommon(const char* ip, const char* port, addrinfo* readable_server_info);
     
 public:
     
     postoffice(const char* port, const char* ip);
+    postoffice(const char* port);
     
     int closeConnection();
-    
     int send(const void *message, int size_of_message);
-    
-    int recieve(void* bufferptr, int size);
-    
+    int receive(void* bufferptr, int size);
+    int isValid();
+
 };
 
+#define TX 0
+#define RX 1
 
+#define NO_ERROR 0
+#define CONNECTION_CLOSE_ERROR -100
+#define SOCKET_ID_NOT_VALID -101
+#define SEND_ERROR -102
+#define RECEIVE_ERROR -103
+#define SIZE_ERROR -104
+#define GET_ADDR_INFO_ERROR -105
+#define SET_SOCKET_OPTION_ERROR -106
+#define SOCKET_CREATION_ERROR -107
+#define BINDING_ERROR -108
 
 #endif
