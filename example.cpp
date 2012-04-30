@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
     else if (!strncmp(argv[1],"RX",2))
     {
         std::cout << "RX\n";
-        postoffice po("s");
+        postoffice po("4000");
         char data[100];
         po.receive(data,100);
         std::cout << data;
