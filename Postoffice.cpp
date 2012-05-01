@@ -51,7 +51,7 @@ int postoffice::isValid()
 }
 
 int postoffice::send(const void *message, int size_of_message)
-{    
+{
     if (socketid)
         if (sendto(socketid, message, size_of_message, 0, server_info->ai_addr, server_info->ai_addrlen))
             return SEND_ERROR;
@@ -81,19 +81,19 @@ int postoffice::createSocket(const char* ip, const char* port)
 {
     struct addrinfo readable_server_info;
     int return_value;
-    
+
     memset(&readable_server_info, 0, sizeof(readable_server_info)); //Reset the struct hints
     readable_server_info.ai_family = AF_INET; //Set to ipv4
     readable_server_info.ai_socktype = SOCK_DGRAM; //Set type to  datagram (Unreliable)
     readable_server_info.ai_protocol = IPPROTO_UDP; //Ensure that udp is used
-    
+
     if (direction)
     {
         readable_server_info.ai_flags = AI_PASSIVE;    //Set ip to local
         return_value = createSocketCommon(ip, port, &readable_server_info);
         if (return_value)
             return return_value;
-        
+
         if (bind(socketid, server_info->ai_addr, server_info->ai_addrlen))
         {
             std::cout << "\n" << strerror(errno) << std::endl;
@@ -102,7 +102,7 @@ int postoffice::createSocket(const char* ip, const char* port)
     }
     else
         return_value = createSocketCommon(ip, port, &readable_server_info);
-    
+
     freeaddrinfo(server_info); //Free the server_info not being used anymore
     return return_value;
 }
@@ -111,14 +111,14 @@ int postoffice::createSocketCommon(const char* ip, const char* port, addrinfo* r
 {
     if (getaddrinfo(ip, port, readable_server_info, &server_info))
         return GET_ADDR_INFO_ERROR;
-    
+
     socketid = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol);
     if (socketid < 0)
     {
         std::cout << "\n" << strerror(errno) << std::endl;
         return SOCKET_CREATION_ERROR;
     }
-    
+
     int TRUE = 1;
     if (setsockopt(socketid, SOL_SOCKET, SO_BROADCAST, &TRUE, sizeof(TRUE)))
     {
@@ -126,4 +126,24 @@ int postoffice::createSocketCommon(const char* ip, const char* port, addrinfo* r
         return SET_SOCKET_OPTION_ERROR;
     }
     return NO_ERROR;
+}
+
+serial_data frank(stamp* header, serial_data packet)
+{
+    int total_size = packet.size + sizeof(stamp);
+    void* p = malloc(total_size);
+    memcpy(p, header, sizeof(stamp));
+    memcpy((char*)p + sizeof(stamp), packet.data, packet.size);
+    serial_data return_value = {total_size, p};
+    return return_value;
+}
+
+serial_data unfrank(serial_data letter, stamp* header) // header is a output variable, memory has to be allocated before function call
+{
+    memcpy(header, letter.data, sizeof(stamp));
+    int total_size = letter.size-sizeof(stamp);
+    void* p = malloc(total_size);
+    memcpy(p, (char*)letter.data+sizeof(stamp), total_size);
+    serial_data return_value = {total_size, p};
+    return return_value;
 }
