@@ -3,7 +3,7 @@
 
 int main(int argc, char *argv[])
 {
-    uint8_t* n = devRandom(1);
+    uint8_t* n = devRandom();
     std::cout << n[0]*1 << std::endl;
     int TOTAL = 2000000;
 
@@ -13,12 +13,12 @@ int main(int argc, char *argv[])
     {
         std::cout << "TX " << std::endl;
         postoffice po("4000", "255.255.255.255");
-        
+
         stamp A = {1, 2, 3, 4, 5, 6, 7};
         const int msgSize = 1400;
         const char* msg = (char*)devRandom(msgSize);
-        
-        
+
+
         for (int u = 0; u < TOTAL; u++)
         {
             po.send((void*)msg, msgSize, A);
@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
     }
     sleep(100);
     return 0;
-    
+
 /*  // Print the stamps :-)
     std::cout << A.Generation_ID*1 << std::endl;
     std::cout << A.Number_Of_Layers*1 << std::endl;
@@ -60,6 +60,6 @@ int main(int argc, char *argv[])
     std::cout << header->Symbol_Size*1 << std::endl;
     std::cout << header->Generation_Size*1 << std::endl;
     std::cout << header->Layer_Size*1 << std::endl;
- */   
- 
+ */
+
 }
