@@ -55,7 +55,7 @@ int postoffice::isValid()
 int postoffice::send(void* message, int size_of_message, stamp header)
 {
     serial_data Letter = {size_of_message, message};
-    return sendLetter(postoffice::frank(header, Letter));;
+    return sendLetter(postoffice::frank(header, Letter));
 }
 
 int postoffice::sendLetter(serial_data Letter)
@@ -88,8 +88,7 @@ int postoffice::receiveLetter(serial_data Letter)
 {
     if (socketid)
     {
-        ssize_t received_message_size;
-        received_message_size = recvfrom(socketid, Letter.data, Letter.size, 0, server_info->ai_addr, &server_info->ai_addrlen);
+        ssize_t received_message_size = recvfrom(socketid, Letter.data, Letter.size, 0, server_info->ai_addr, &server_info->ai_addrlen);
         if (received_message_size > 0)
             if (received_message_size > 2147483647)
                 return SIZE_ERROR;
@@ -157,6 +156,7 @@ serial_data postoffice::frank(stamp header, serial_data packet)
     serial_data return_value = {total_size, p};
     memcpy(p, &header, sizeof(stamp));
     memcpy((char*)p + sizeof(stamp), packet.data, packet.size);
+    free(packet.data);
     return return_value;
 }
 

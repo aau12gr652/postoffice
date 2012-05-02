@@ -58,6 +58,6 @@ public:
 #define SOCKET_CREATION_ERROR -107
 #define BINDING_ERROR -108
 
-uint8_t* devRandom(int);
+uint8_t* devRandom(int count = 1);
 
 #endif
