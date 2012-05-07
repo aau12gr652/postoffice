@@ -29,7 +29,7 @@ class postoffice {
     int createSocketCommon(const char* ip, const char* port, addrinfo* readable_server_info);
     int sendLetter(serial_data);
     int receiveLetter(serial_data);
-    serial_data frank(stamp, serial_data);
+    serial_data frank(stamp*, serial_data);
     int unfrank(serial_data, stamp*);
     
 public:
@@ -39,7 +39,7 @@ public:
     
     int closeConnection();
     int receive(void*, int, stamp*);
-    int send(void*, int, stamp);
+    int send(void*, int, stamp*);
     int isValid();
 
 };

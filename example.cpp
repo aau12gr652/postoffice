@@ -5,7 +5,7 @@ int main(int argc, char *argv[])
 {
     uint8_t* n = devRandom();
     std::cout << n[0]*1 << std::endl;
-    int TOTAL = 2000000;
+    int TOTAL = 2000;
 
     if (argc != 2)
         return -1;
@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
 
         for (int u = 0; u < TOTAL; u++)
         {
-            po.send((void*)msg, msgSize, A);
+            po.send((void*)msg, msgSize, &A);
             std::cout << u*1 << std::endl;
         }
         po.closeConnection();
@@ -41,7 +41,6 @@ int main(int argc, char *argv[])
             std::cout << u*1 << std::endl;
         }
     }
-    sleep(100);
     return 0;
 
 /*  // Print the stamps :-)

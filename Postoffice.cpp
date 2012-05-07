@@ -52,7 +52,7 @@ int postoffice::isValid()
     return false;
 }
 
-int postoffice::send(void* message, int size_of_message, stamp header)
+int postoffice::send(void* message, int size_of_message, stamp* header)
 {
     serial_data Letter = {size_of_message, message};
     return sendLetter(postoffice::frank(header, Letter));
@@ -149,12 +149,12 @@ int postoffice::createSocketCommon(const char* ip, const char* port, addrinfo* r
     return NO_ERROR;
 }
 
-serial_data postoffice::frank(stamp header, serial_data packet)
+serial_data postoffice::frank(stamp* header, serial_data packet)
 {
     int total_size = packet.size + sizeof(stamp);
     void* p = malloc(total_size);
     serial_data return_value = {total_size, p};
-    memcpy(p, &header, sizeof(stamp));
+    memcpy(p, header, sizeof(stamp));
     memcpy((char*)p + sizeof(stamp), packet.data, packet.size);
     free(packet.data);
     return return_value;
