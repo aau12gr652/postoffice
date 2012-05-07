@@ -20,9 +20,9 @@ class postoffice {
     int socketid;
     bool direction;
     struct addrinfo *server_info;
-    
+
     bool decision;
-    
+
     int createTxSocket(bool broadcast, const char* ip, const char* port);
     int createRxSocket(bool broadcast, const char* port);
     int createSocket(const char* ip, const char* port);
@@ -31,15 +31,16 @@ class postoffice {
     int receiveLetter(serial_data);
     serial_data frank(stamp*, serial_data);
     int unfrank(serial_data, stamp*);
-    
+
 public:
-    
+
     postoffice(const char* port, const char* ip);
     postoffice(const char* port);
-    
+
     int closeConnection();
     int receive(void*, int, stamp*);
     int send(void*, int, stamp*);
+    int send(serial_data, stamp*);
     int isValid();
 
 };
@@ -59,5 +60,6 @@ public:
 #define BINDING_ERROR -108
 
 uint8_t* devRandom(int count = 1);
+void print_stamp(stamp*);
 
 #endif

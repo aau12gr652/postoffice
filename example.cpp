@@ -5,7 +5,8 @@ int main(int argc, char *argv[])
 {
     uint8_t* n = devRandom();
     std::cout << n[0]*1 << std::endl;
-    int TOTAL = 2000;
+    free(n);
+    int TOTAL = 20000;
 
     if (argc != 2)
         return -1;
@@ -16,16 +17,19 @@ int main(int argc, char *argv[])
 
         stamp A = {1, 2, 3, 4, 5, 6, 7};
         const int msgSize = 1400;
-        const char* msg = (char*)devRandom(msgSize);
-
+        void* msg = (void*)devRandom(msgSize);
+		serial_data Letter = {msgSize, msg};
 
         for (int u = 0; u < TOTAL; u++)
         {
-            po.send((void*)msg, msgSize, &A);
+            po.send(msg, msgSize, &A);
+            //po.send(Letter, &A);
             std::cout << u*1 << std::endl;
+            usleep(500);
         }
         po.closeConnection();
-        usleep(500);
+        free(msg);
+        //sleep(1000);
     }
     else if (!strncmp(argv[1],"RX",2))
     {
@@ -40,6 +44,7 @@ int main(int argc, char *argv[])
             t = po.receive(payload, 1600, header);
             std::cout << u*1 << std::endl;
         }
+        free(header);
     }
     return 0;
 

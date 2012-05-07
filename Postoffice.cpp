@@ -55,11 +55,19 @@ int postoffice::isValid()
 int postoffice::send(void* message, int size_of_message, stamp* header)
 {
     serial_data Letter = {size_of_message, message};
-    return sendLetter(postoffice::frank(header, Letter));
+    Letter = postoffice::frank(header, Letter);
+    int return_value = sendLetter(Letter);
+    free(Letter.data);
+    return return_value;
+}
+
+int postoffice::send(serial_data message, stamp* header)
+{
+	return send(message.data, message.size, header);
 }
 
 int postoffice::sendLetter(serial_data Letter)
-{    
+{
     if (socketid)
     {
         ssize_t result = sendto(socketid, Letter.data, Letter.size, 0, server_info->ai_addr, server_info->ai_addrlen);
@@ -104,19 +112,19 @@ int postoffice::createSocket(const char* ip, const char* port)
 {
     struct addrinfo readable_server_info;
     int return_value;
-    
+
     memset(&readable_server_info, 0, sizeof(readable_server_info)); //Reset the struct hints
     readable_server_info.ai_family = AF_INET; //Set to ipv4
     readable_server_info.ai_socktype = SOCK_DGRAM; //Set type to  datagram (Unreliable)
     readable_server_info.ai_protocol = IPPROTO_UDP; //Ensure that udp is used
-    
+
     if (direction)
     {
         readable_server_info.ai_flags = AI_PASSIVE;    //Set ip to local
         return_value = createSocketCommon(ip, port, &readable_server_info);
         if (return_value)
             return return_value;
-        
+
         if (bind(socketid, server_info->ai_addr, server_info->ai_addrlen))
         {
             std::cout << "\n" << strerror(errno) << std::endl;
@@ -132,14 +140,14 @@ int postoffice::createSocketCommon(const char* ip, const char* port, addrinfo* r
 {
     if (getaddrinfo(ip, port, readable_server_info, &server_info))
         return GET_ADDR_INFO_ERROR;
-    
+
     socketid = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol);
     if (socketid < 0)
     {
         std::cout << "\n" << strerror(errno) << std::endl;
         return SOCKET_CREATION_ERROR;
     }
-    
+
     int TRUE = 1;
     if (setsockopt(socketid, SOL_SOCKET, SO_BROADCAST, &TRUE, sizeof(TRUE)))
     {
@@ -156,7 +164,6 @@ serial_data postoffice::frank(stamp* header, serial_data packet)
     serial_data return_value = {total_size, p};
     memcpy(p, header, sizeof(stamp));
     memcpy((char*)p + sizeof(stamp), packet.data, packet.size);
-    free(packet.data);
     return return_value;
 }
 
@@ -177,4 +184,15 @@ uint8_t* devRandom(int count)
         tal[n] = randomFile.get();
     randomFile.close();
     return tal;
+}
+
+void print_stamp(stamp* header)
+{
+    std::cout << "Generation_ID: " << header->Generation_ID*1 << std::endl;
+    std::cout << "Number_Of_Layers: " << header->Number_Of_Layers*1 << std::endl;
+    std::cout << "Layer_ID: " << header->Layer_ID*1 << std::endl;
+    std::cout << "Field_Size: " << header->Field_Size*1 << std::endl;
+    std::cout << "Symbol_Size: " << header->Symbol_Size*1 << std::endl;
+    std::cout << "Generation_Size: " << header->Generation_Size*1 << std::endl;
+    std::cout << "Layer_Size: " << header->Layer_Size*1 << std::endl;
 }
