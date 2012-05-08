@@ -79,7 +79,10 @@ int postoffice::sendLetter(serial_data Letter)
             return SEND_ERROR;
         }
         else
+        {
+        	usleep(500);
             return NO_ERROR;
+        }
     }
     return SOCKET_ID_NOT_VALID;
 }
@@ -195,4 +198,5 @@ void print_stamp(stamp* header)
     std::cout << "Symbol_Size: " << header->Symbol_Size*1 << std::endl;
     std::cout << "Generation_Size: " << header->Generation_Size*1 << std::endl;
     std::cout << "Layer_Size: " << header->Layer_Size*1 << std::endl;
+    std::cout << std::endl;
 }
