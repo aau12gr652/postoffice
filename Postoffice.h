@@ -1,6 +1,9 @@
 #ifndef _postoffice_h
 #define _postoffice_h
 
+#include <cstdlib>
+#include <stdint.h>
+
 struct stamp {
     uint8_t Generation_ID;
     uint8_t Number_Of_Layers;
