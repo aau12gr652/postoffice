@@ -91,8 +91,12 @@ int postoffice::receive(void* bufferptr, int size, stamp* header, int timeOut)
 {
     serial_data Letter = {size, bufferptr};
     int msgSize = postoffice::receiveLetter(Letter, timeOut);
-    Letter.size = msgSize;
-    return unfrank(Letter, header);
+    if (msgSize > 0)
+    {
+	    Letter.size = msgSize;
+        return unfrank(Letter, header);
+    }
+    return msgSize;
 }
 
 int postoffice::receiveLetter(serial_data Letter, int timeOut)
@@ -117,8 +121,8 @@ int postoffice::receiveLetter(serial_data Letter, int timeOut)
                 return SIZE_ERROR;
             else
                 return received_message_size;
-        std::cout << "\n" << strerror(errno) << std::endl;
-        return RECEIVE_ERROR;
+        else
+            return 0; // Zero bytes received, aka. time-out
     }
     return SOCKET_ID_NOT_VALID;
 }
