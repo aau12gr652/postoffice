@@ -25,7 +25,6 @@ int main(int argc, char *argv[])
             po.send(msg, msgSize, &A);
             //po.send(Letter, &A);
             std::cout << u*1 << std::endl;
-            usleep(500);
         }
         po.closeConnection();
         free(msg);
