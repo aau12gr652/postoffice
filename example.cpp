@@ -6,7 +6,7 @@ int main(int argc, char *argv[])
     uint8_t* n = devRandom();
     std::cout << n[0]*1 << std::endl;
     free(n);
-    int TOTAL = 20000;
+    int TOTAL = 100;
 
     if (argc != 2)
         return -1;
@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
         int t;
         for (int u = 0; u < TOTAL; u++)
         {
-            t = po.receive(payload, 1600, header);
+            t = po.receive(payload, 1600, header, 1);
             std::cout << u*1 << std::endl;
         }
         free(header);

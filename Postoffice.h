@@ -23,6 +23,7 @@ class postoffice {
     int socketid;
     bool direction;
     struct addrinfo *server_info;
+    int timeout;
 
     bool decision;
 
@@ -31,7 +32,7 @@ class postoffice {
     int createSocket(const char* ip, const char* port);
     int createSocketCommon(const char* ip, const char* port, addrinfo* readable_server_info);
     int sendLetter(serial_data);
-    int receiveLetter(serial_data);
+    int receiveLetter(serial_data, int);
     serial_data frank(stamp*, serial_data);
     int unfrank(serial_data, stamp*);
 
@@ -41,7 +42,7 @@ public:
     postoffice(const char* port);
 
     int closeConnection();
-    int receive(void*, int, stamp*);
+    int receive(void*, int, stamp*, int);
     int send(void*, int, stamp*);
     int send(serial_data, stamp*);
     int isValid();

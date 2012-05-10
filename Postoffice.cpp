@@ -24,6 +24,7 @@ postoffice::postoffice(const char* port, const char* ip)
 postoffice::postoffice(const char* port)
 {
     direction=RX;
+    timeout = 0;
     int return_value = createSocket(NULL, port);
     if (return_value)
     {
@@ -86,19 +87,33 @@ int postoffice::sendLetter(serial_data Letter)
     return SOCKET_ID_NOT_VALID;
 }
 
-int postoffice::receive(void* bufferptr, int size, stamp* header)
+int postoffice::receive(void* bufferptr, int size, stamp* header, int timeOut)
 {
     serial_data Letter = {size, bufferptr};
-    int msgSize = postoffice::receiveLetter(Letter);
+    int msgSize = postoffice::receiveLetter(Letter, timeOut);
     Letter.size = msgSize;
     return unfrank(Letter, header);
 }
 
-int postoffice::receiveLetter(serial_data Letter)
+int postoffice::receiveLetter(serial_data Letter, int timeOut)
 {
     if (socketid)
     {
+        if (timeOut != timeout)
+        {
+        	timeout = timeOut;
+            struct timeval timeout_struct;
+            timeout_struct.tv_sec = timeout;
+            timeout_struct.tv_usec = 0;
+            if (setsockopt(socketid, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout_struct, sizeof(timeout_struct)))
+            {
+                std::cout << "\n" << strerror(errno) << std::endl;
+                return SET_SOCKET_OPTION_ERROR;
+            }
+        }
         ssize_t received_message_size = recvfrom(socketid, Letter.data, Letter.size, 0, server_info->ai_addr, &server_info->ai_addrlen);
+        std::cout << "øv" << std::endl;
+        return 0;
         if (received_message_size > 0)
             if (received_message_size > 2147483647)
                 return SIZE_ERROR;
@@ -131,6 +146,15 @@ int postoffice::createSocket(const char* ip, const char* port)
         {
             std::cout << "\n" << strerror(errno) << std::endl;
             return BINDING_ERROR;
+        }
+
+        struct timeval timeout_struct;
+        timeout_struct.tv_sec = timeout;
+        timeout_struct.tv_usec = 0;
+        if (setsockopt(socketid, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout_struct, sizeof(timeout_struct)))
+        {
+            std::cout << "\n" << strerror(errno) << std::endl;
+            return SET_SOCKET_OPTION_ERROR;
         }
     }
     else
