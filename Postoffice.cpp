@@ -74,7 +74,6 @@ int postoffice::sendLetter(serial_data Letter)
         int fejl = errno;
         if (result < 0)
         {
-            int fejl = errno;
             std::cout << std::endl << strerror(fejl) << std::endl;
             return SEND_ERROR;
         }
