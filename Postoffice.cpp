@@ -80,7 +80,7 @@ int postoffice::sendLetter(serial_data Letter)
         }
         else
         {
-        	usleep(500);
+        	usleep(TX_DELAY);
             return NO_ERROR;
         }
     }
@@ -112,8 +112,6 @@ int postoffice::receiveLetter(serial_data Letter, int timeOut)
             }
         }
         ssize_t received_message_size = recvfrom(socketid, Letter.data, Letter.size, 0, server_info->ai_addr, &server_info->ai_addrlen);
-        std::cout << "øv" << std::endl;
-        return 0;
         if (received_message_size > 0)
             if (received_message_size > 2147483647)
                 return SIZE_ERROR;

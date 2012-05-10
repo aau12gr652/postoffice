@@ -49,6 +49,8 @@ public:
 
 };
 
+#define TX_DELAY 500
+
 #define TX 0
 #define RX 1
 
