@@ -22,8 +22,8 @@ int main(int argc, char *argv[])
 
         for (int u = 0; u < TOTAL; u++)
         {
-            po.send(msg, msgSize, &A);
-            //po.send(Letter, &A);
+            //po.send(msg, msgSize, &A);
+            po.send(Letter, &A);
             std::cout << u*1 << std::endl;
         }
         po.closeConnection();
@@ -33,17 +33,21 @@ int main(int argc, char *argv[])
     else if (!strncmp(argv[1],"RX",2))
     {
         std::cout << "RX " << std::endl;
-        postoffice po("4000");
+        postoffice po("4000", 1);
         char payload[1600];
         stamp* header = (stamp*)malloc(sizeof(stamp));
+        po.startThread();
 
         int t;
         for (int u = 0; u < TOTAL; u++)
         {
-            t = po.receive(payload, 1600, header, 1);
-            std::cout << u*1 << std::endl;
+            t = po.receive(payload, header);
+            for (int n = 0; n < t; n++)
+	            std::cout << payload[n]*1 << " ";
+	        std::cout << std::endl;
         }
         free(header);
+        po.closeConnection();
     }
     return 0;
 

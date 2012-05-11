@@ -3,6 +3,16 @@
 
 #include <cstdlib>
 #include <stdint.h>
+#include <boost/thread.hpp>
+#include <iostream>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <errno.h>
+#include <string.h>
+#include <fstream>
 
 struct stamp {
     uint8_t Generation_ID;
@@ -23,33 +33,41 @@ class postoffice {
     int socketid;
     bool direction;
     struct addrinfo *server_info;
+    bool decision;
     int timeout;
 
-    bool decision;
+    int runThread;
+    boost::mutex dataLock;
+    boost::thread* receivingThread;
+    void receiveThread(void);
+    std::list<serial_data> receivedData;
 
     int createTxSocket(bool broadcast, const char* ip, const char* port);
     int createRxSocket(bool broadcast, const char* port);
     int createSocket(const char* ip, const char* port);
     int createSocketCommon(const char* ip, const char* port, addrinfo* readable_server_info);
     int sendLetter(serial_data);
-    int receiveLetter(serial_data, int);
+    int receiveLetter(serial_data);
     serial_data frank(stamp*, serial_data);
-    int unfrank(serial_data, stamp*);
+    int unfrank(serial_data letter, stamp* header, void* bufferptr);
 
 public:
 
-    postoffice(const char* port, const char* ip);
-    postoffice(const char* port);
+    postoffice(const char* port, const char* ip); // Transmistter
+    postoffice(const char* port, int timeOut); // Receiver
 
     int closeConnection();
-    int receive(void*, int, stamp*, int);
-    int send(void*, int, stamp*);
-    int send(serial_data, stamp*);
     int isValid();
 
+    int send(void*, int, stamp*);
+    int send(serial_data, stamp*);
+
+    int receive(void*, stamp*);
+    void startThread(void);
+    void stopThread(void);
 };
 
-#define TX_DELAY 500
+#define TX_DELAY 750
 
 #define TX 0
 #define RX 1

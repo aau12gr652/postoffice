@@ -1,13 +1,4 @@
-#include <iostream>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <errno.h>
 #include "Postoffice.h"
-#include <string.h>
-#include <fstream>
 
 postoffice::postoffice(const char* port, const char* ip)
 {
@@ -21,10 +12,11 @@ postoffice::postoffice(const char* port, const char* ip)
     }
 }
 
-postoffice::postoffice(const char* port)
+postoffice::postoffice(const char* port, int timeOut)
 {
     direction=RX;
-    timeout = 0;
+    timeout = timeOut;
+    runThread = 0;
     int return_value = createSocket(NULL, port);
     if (return_value)
     {
@@ -37,6 +29,7 @@ postoffice::postoffice(const char* port)
 int postoffice::closeConnection()
 {
     freeaddrinfo(server_info); //Free the server_info not being used anymore
+    runThread = 0;
     if (socketid)
         if (close(socketid))
             return CONNECTION_CLOSE_ERROR;
@@ -87,34 +80,24 @@ int postoffice::sendLetter(serial_data Letter)
     return SOCKET_ID_NOT_VALID;
 }
 
-int postoffice::receive(void* bufferptr, int size, stamp* header, int timeOut)
+int postoffice::receive(void* bufferptr, stamp* header)
 {
-    serial_data Letter = {size, bufferptr};
-    int msgSize = postoffice::receiveLetter(Letter, timeOut);
-    if (msgSize > 0)
-    {
-	    Letter.size = msgSize;
-        return unfrank(Letter, header);
-    }
-    return msgSize;
+	boost::mutex::scoped_lock lock_it(dataLock);
+	if (receivedData.size())
+	{
+		serial_data Letter = receivedData.back();
+		int msgSize = unfrank(Letter, header, bufferptr);
+		free(Letter.data);
+		receivedData.pop_back();
+		return msgSize;
+	}
+	return 0;
 }
 
-int postoffice::receiveLetter(serial_data Letter, int timeOut)
+int postoffice::receiveLetter(serial_data Letter)
 {
     if (socketid)
     {
-        if (timeOut != timeout)
-        {
-        	timeout = timeOut;
-            struct timeval timeout_struct;
-            timeout_struct.tv_sec = timeout;
-            timeout_struct.tv_usec = 0;
-            if (setsockopt(socketid, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout_struct, sizeof(timeout_struct)))
-            {
-                std::cout << "\n" << strerror(errno) << std::endl;
-                return SET_SOCKET_OPTION_ERROR;
-            }
-        }
         ssize_t received_message_size = recvfrom(socketid, Letter.data, Letter.size, 0, server_info->ai_addr, &server_info->ai_addrlen);
         if (received_message_size > 0)
             if (received_message_size > 2147483647)
@@ -125,6 +108,25 @@ int postoffice::receiveLetter(serial_data Letter, int timeOut)
             return 0; // Zero bytes received, aka. time-out
     }
     return SOCKET_ID_NOT_VALID;
+}
+
+void postoffice::receiveThread()
+{
+	while(runThread)
+	{
+		int size = 1500;
+		void* p = malloc(size);
+		serial_data Letter = {size, p};
+		int msgSize = receiveLetter(Letter);
+		if (msgSize > 0)
+		{
+            boost::mutex::scoped_lock lock_it(dataLock);
+            Letter.size = msgSize;
+			receivedData.push_front(Letter);
+		}
+		else
+			free(p);
+	}
 }
 
 int postoffice::createSocket(const char* ip, const char* port)
@@ -195,12 +197,23 @@ serial_data postoffice::frank(stamp* header, serial_data packet)
     return return_value;
 }
 
-int postoffice::unfrank(serial_data letter, stamp* header) // header is a output variable, memory has to be allocated before function call
+int postoffice::unfrank(serial_data letter, stamp* header, void* bufferptr) // header is a output variable, memory has to be allocated before function call
 {
     memcpy(header, letter.data, sizeof(stamp));
     int total_size = letter.size-sizeof(stamp);
-    memcpy(letter.data, (char*)letter.data+sizeof(stamp), total_size);
+    memcpy(bufferptr, (char*)letter.data+sizeof(stamp), total_size);
     return total_size;
+}
+
+void postoffice::startThread()
+{
+	runThread = 1;
+	receivingThread = new boost::thread( &postoffice::receiveThread, this );
+}
+
+void postoffice::stopThread()
+{
+	runThread = 0;
 }
 
 uint8_t* devRandom(int count)
