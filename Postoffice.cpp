@@ -44,6 +44,8 @@ int postoffice::closeConnection()
 postoffice::~postoffice()
 {
 	closeConnection();
+	// Free receivedData
+
 }
 
 int postoffice::isValid()
@@ -122,7 +124,7 @@ void postoffice::receiveThread()
 	while(runThread)
 	{
 		int size = 1500;
-		char p[size];
+		void* p = malloc(size);
 		serial_data Letter = {size, (void*)p};
 		int msgSize = receiveLetter(Letter);
 		if (msgSize > 0)
@@ -131,6 +133,8 @@ void postoffice::receiveThread()
             Letter.size = msgSize;
 			receivedData.push_front(Letter);
 		}
+		else
+			free(p);
 	}
 }
 
