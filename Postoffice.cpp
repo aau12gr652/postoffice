@@ -80,7 +80,7 @@ int postoffice::sendLetter(serial_data Letter)
         }
         else
         {
-        	usleep(TX_DELAY);
+//        	usleep(TX_DELAY);
             return NO_ERROR;
         }
     }
