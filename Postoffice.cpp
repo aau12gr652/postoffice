@@ -43,9 +43,13 @@ int postoffice::closeConnection()
 
 postoffice::~postoffice()
 {
-	closeConnection();
-	// Free receivedData
-
+    closeConnection();
+    while(receivedData.size() > 0)
+    {
+        free(receivedData.front().data);
+        receivedData.pop_front();
+    // Free receivedData
+    }
 }
 
 int postoffice::isValid()
@@ -66,7 +70,7 @@ int postoffice::send(void* message, int size_of_message, stamp* header)
 
 int postoffice::send(serial_data message, stamp* header)
 {
-	return send(message.data, message.size, header);
+    return send(message.data, message.size, header);
 }
 
 int postoffice::sendLetter(serial_data Letter)
@@ -82,7 +86,7 @@ int postoffice::sendLetter(serial_data Letter)
         }
         else
         {
-//        	usleep(TX_DELAY);
+//            usleep(TX_DELAY);
             return NO_ERROR;
         }
     }
@@ -91,16 +95,16 @@ int postoffice::sendLetter(serial_data Letter)
 
 int postoffice::receive(void* bufferptr, stamp* header)
 {
-	boost::mutex::scoped_lock lock_it(dataLock);
-	if (receivedData.size())
-	{
-		serial_data Letter = receivedData.back();
-		int msgSize = unfrank(Letter, header, bufferptr);
-		free(Letter.data);
-		receivedData.pop_back();
-		return msgSize;
-	}
-	return 0;
+    boost::mutex::scoped_lock lock_it(dataLock);
+    if (receivedData.size())
+    {
+        serial_data Letter = receivedData.back();
+        int msgSize = unfrank(Letter, header, bufferptr);
+        free(Letter.data);
+        receivedData.pop_back();
+        return msgSize;
+    }
+    return 0;
 }
 
 int postoffice::receiveLetter(serial_data Letter)
@@ -121,21 +125,21 @@ int postoffice::receiveLetter(serial_data Letter)
 
 void postoffice::receiveThread()
 {
-	while(runThread)
-	{
-		int size = 1500;
-		void* p = malloc(size);
-		serial_data Letter = {size, (void*)p};
-		int msgSize = receiveLetter(Letter);
-		if (msgSize > 0)
-		{
+    while(runThread)
+    {
+        int size = 1500;
+        void* p = malloc(size);
+        serial_data Letter = {size, (void*)p};
+        int msgSize = receiveLetter(Letter);
+        if (msgSize > 0)
+        {
             boost::mutex::scoped_lock lock_it(dataLock);
             Letter.size = msgSize;
-			receivedData.push_front(Letter);
-		}
-		else
-			free(p);
-	}
+            receivedData.push_front(Letter);
+        }
+        else
+            free(p);
+    }
 }
 
 int postoffice::createSocket(const char* ip, const char* port)
@@ -223,7 +227,7 @@ void postoffice::startThread()
 
 void postoffice::stopThread()
 {
-	runThread = 0;
+    runThread = 0;
 }
 
 uint8_t* devRandom(int count)
