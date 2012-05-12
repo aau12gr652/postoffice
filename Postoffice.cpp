@@ -41,7 +41,7 @@ int postoffice::closeConnection()
         return SOCKET_ID_NOT_VALID;
 }
 
-postoffice::~postoffice();
+postoffice::~postoffice()
 {
 	closeConnection();
 }
@@ -212,7 +212,7 @@ int postoffice::unfrank(serial_data letter, stamp* header, void* bufferptr) // h
 
 void postoffice::startThread()
 {
-    assert(direction)
+    assert(direction);
     runThread = 1;
     receivingThread = new boost::thread( &postoffice::receiveThread, this );
 }
