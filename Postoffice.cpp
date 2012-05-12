@@ -24,6 +24,8 @@ postoffice::postoffice(const char* port, int timeOut)
         closeConnection();
         socketid=0;
     }
+    else
+        startThread();
 }
 
 int postoffice::closeConnection()
@@ -35,8 +37,13 @@ int postoffice::closeConnection()
             return CONNECTION_CLOSE_ERROR;
         else
             return NO_ERROR;
-        else
-            return SOCKET_ID_NOT_VALID;
+    else
+        return SOCKET_ID_NOT_VALID;
+}
+
+postoffice::~postoffice();
+{
+	closeConnection();
 }
 
 int postoffice::isValid()
@@ -115,8 +122,8 @@ void postoffice::receiveThread()
 	while(runThread)
 	{
 		int size = 1500;
-		void* p = malloc(size);
-		serial_data Letter = {size, p};
+		char p[size];
+		serial_data Letter = {size, (void*)p};
 		int msgSize = receiveLetter(Letter);
 		if (msgSize > 0)
 		{
@@ -124,8 +131,6 @@ void postoffice::receiveThread()
             Letter.size = msgSize;
 			receivedData.push_front(Letter);
 		}
-		else
-			free(p);
 	}
 }
 
@@ -207,8 +212,9 @@ int postoffice::unfrank(serial_data letter, stamp* header, void* bufferptr) // h
 
 void postoffice::startThread()
 {
-	runThread = 1;
-	receivingThread = new boost::thread( &postoffice::receiveThread, this );
+    assert(direction)
+    runThread = 1;
+    receivingThread = new boost::thread( &postoffice::receiveThread, this );
 }
 
 void postoffice::stopThread()
@@ -229,6 +235,7 @@ uint8_t* devRandom(int count)
 
 void print_stamp(stamp* header)
 {
+    std::cout << std::endl;
     std::cout << "Generation_ID: " << header->Generation_ID*1 << std::endl;
     std::cout << "Number_Of_Layers: " << header->Number_Of_Layers*1 << std::endl;
     std::cout << "Layer_ID: " << header->Layer_ID*1 << std::endl;

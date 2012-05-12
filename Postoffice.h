@@ -55,6 +55,7 @@ public:
 
     postoffice(const char* port, const char* ip); // Transmistter
     postoffice(const char* port, int timeOut); // Receiver
+    ~postoffice(void);
 
     int closeConnection();
     int isValid();

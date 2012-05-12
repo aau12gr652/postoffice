@@ -20,7 +20,7 @@ def load_helper(ctx, name):
 
 def options(opt):
     opt.load('wurftools')
-    load_helper(opt, 'boost')
+    conf.env['BOOST_LIB'] = '/usr/local/lib'
 
 def configure(conf):
 
@@ -43,8 +43,9 @@ def build(bld):
     bld.program(features = 'cxx',
                 source   = ['example.cpp','Postoffice.cpp'],
                 target   = 'example',
-                includes  = '..',
+                includes  = ['..','/usr/local/lib'],
                 use	= ['boost_includes'],
     	        defines = '__STDC_CONSTANT_MACROS',
+    	        stlib = ['boost_system-mt', 'boost_thread-mt','avutil','avformat','avcodec','swscale'],
                 cxxflags = cxxflags)
 

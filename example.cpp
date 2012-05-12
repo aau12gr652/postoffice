@@ -1,4 +1,6 @@
+#include <boost/thread/thread.hpp>
 #include <iostream>
+#define BOOST_THREAD_NO_LIB
 #include "Postoffice.h"
 
 int main(int argc, char *argv[])
