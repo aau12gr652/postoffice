@@ -68,8 +68,6 @@ public:
     void stopThread(void);
 };
 
-#define TX_DELAY 750
-
 #define TX 0
 #define RX 1
 

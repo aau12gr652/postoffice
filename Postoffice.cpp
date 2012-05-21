@@ -85,10 +85,7 @@ int postoffice::sendLetter(serial_data Letter)
             return SEND_ERROR;
         }
         else
-        {
-//            usleep(TX_DELAY);
             return NO_ERROR;
-        }
     }
     return SOCKET_ID_NOT_VALID;
 }
