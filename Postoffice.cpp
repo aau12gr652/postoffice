@@ -17,6 +17,7 @@ postoffice::postoffice(const char* port, int timeOut)
     direction=RX;
     timeout = timeOut;
     runThread = 0;
+    postDanmarkFactor = 0;
     int return_value = createSocket(NULL, port);
     if (return_value)
     {
@@ -128,7 +129,8 @@ void postoffice::receiveThread()
         void* p = malloc(size);
         serial_data Letter = {size, (void*)p};
         int msgSize = receiveLetter(Letter);
-        if (msgSize > 0)
+        int randomTal = std::ceil(((rand()/(float)RAND_MAX)*99));
+        if (msgSize > 0 && !(postDanmarkFactor > randomTal))
         {
             boost::mutex::scoped_lock lock_it(dataLock);
             Letter.size = msgSize;

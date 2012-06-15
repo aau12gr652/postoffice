@@ -66,6 +66,8 @@ public:
     int receive(void*, stamp*);
     void startThread(void);
     void stopThread(void);
+
+    int postDanmarkFactor;
 };
 
 #define TX 0
