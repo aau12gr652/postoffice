@@ -129,7 +129,7 @@ void postoffice::receiveThread()
         void* p = malloc(size);
         serial_data Letter = {size, (void*)p};
         int msgSize = receiveLetter(Letter);
-        int randomTal = std::ceil(((rand()/(float)RAND_MAX)*99));
+        int randomTal = std::ceil(((rand()/(float)RAND_MAX)*100)) - 1; // Random number {0 - 99}
         if (msgSize > 0 && !(postDanmarkFactor > randomTal))
         {
             boost::mutex::scoped_lock lock_it(dataLock);
