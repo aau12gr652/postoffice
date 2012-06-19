@@ -3,6 +3,7 @@
 postoffice::postoffice(const char* port, const char* ip)
 {
     direction=TX;
+    packets = 0;
     int return_value = createSocket(ip, port);
     if (return_value)
     {
@@ -18,6 +19,7 @@ postoffice::postoffice(const char* port, int timeOut)
     timeout = timeOut;
     runThread = 0;
     postDanmarkFactor = 0;
+    packets = 0;
     int return_value = createSocket(NULL, port);
     if (return_value)
     {
@@ -86,7 +88,10 @@ int postoffice::sendLetter(serial_data Letter)
             return SEND_ERROR;
         }
         else
+        {
+            packets++;
             return NO_ERROR;
+        }
     }
     return SOCKET_ID_NOT_VALID;
 }
@@ -130,11 +135,15 @@ void postoffice::receiveThread()
         serial_data Letter = {size, (void*)p};
         int msgSize = receiveLetter(Letter);
         int randomTal = std::ceil((rand()/(float)RAND_MAX)*100); // Random number {1 - 100}
-        if (msgSize > 0 && !(postDanmarkFactor >= randomTal))
+        if (msgSize > 0)
         {
-            boost::mutex::scoped_lock lock_it(dataLock);
-            Letter.size = msgSize;
-            receivedData.push_front(Letter);
+            packets++;
+            if (!(postDanmarkFactor >= randomTal))
+            {
+                boost::mutex::scoped_lock lock_it(dataLock);
+                Letter.size = msgSize;
+                receivedData.push_front(Letter);
+            }
         }
         else
             free(p);

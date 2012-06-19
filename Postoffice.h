@@ -67,7 +67,8 @@ public:
     void startThread(void);
     void stopThread(void);
 
-    int postDanmarkFactor;
+    int postDanmarkFactor; // Til at smide pakker væk med
+    int packets; // Til at tælle hvor mange pakker der er modtaget eller sendt
 };
 
 #define TX 0
