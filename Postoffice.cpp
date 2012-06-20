@@ -223,6 +223,10 @@ int postoffice::unfrank(serial_data letter, stamp* header, void* bufferptr) // h
     memcpy(header, letter.data, sizeof(stamp));
     int total_size = letter.size-sizeof(stamp);
     memcpy(bufferptr, (char*)letter.data+sizeof(stamp), total_size);
+/*    std::cout << "L: " << header->Layer_ID*1 << " Total: " << total_size << " Symbol: " << header->Symbol_Size << " Layer: " << header->Layer_Size;
+	for (int n = total_size - 6; n < total_size; n++)
+        std::cout << " " << n - (total_size - 6) << ": " << ((uint8_t*)bufferptr)[n]*1;
+    std::cout << std::endl; */
     return total_size;
 }
 
